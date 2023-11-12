@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 {% load static %}
+
 <html lang="en" dir="ltr">
 
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <title>tariq</title>
 
@@ -14,27 +16,121 @@
 
   {%if request.user.is_authenticated%}
     {% include "ecom/customer_navbar.html" %}
+   
   {%else%}
-    {% include "ecom/navbar.html" %}
+   
   {%endif%}
 
-  <center>
+ 
+
+ 
+<style>
+  /* Add custom styles for your form */
+  body {
+    padding: 20px;
+  }
+
+  /* Optional: Customize the form width */
+  form {
+    max-width: 400px;
+    margin: auto;
+  }
+
+  /* Optional: Center the form on the page */
+  .container {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  /* Optional: Style the form header */
+  h1 {
+    text-align: center;
+  }
+
+  /* Optional: Add margin to the form fields */
+  .mb-3 {
+    margin-bottom: 15px;
+  }
+
+  /* Optional: Customize the form button */
+  .btn-primary {
+    width: 100%;
+  }
+
+  /* Optional: Style error messages */
+  .invalid-feedback {
+    display: block;
+    color: #dc3545;
+  }
+
+  /* Optional: Add styling to form validation feedback */
+  .was-validated .form-control:valid,
+  .was-validated .form-select:valid {
+    border-color: #28a745;
+  }
+
+  .was-validated .form-control:valid:focus,
+  .was-validated .form-select:valid:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+  }
+
+  /* Optional: Style the labels */
+  label {
+    font-weight: bold;
+  }
+
+</style>
+ <center>
     <h3 class='alert alert-success'>Book an appointment with Us</h3>
+<form action="{% url 'appointment_create' %}" method="POST" >
+  {% csrf_token %}
 
-    <form method="POST">
-      <!-- Very Important csrf Token -->
-      {% csrf_token %}
-      <div class="form-group">
-        <p>
-        <h3>{{ form.as_p }}</h3>
-        </p>
-        <br>
-        <input type="submit" value="Send Message" class='btn btn-primary btn-lg'>
-      </div>
-    </form>
-  </center>
-  {% include "ecom/footer.html" %}
-</body>
+  <div class="mb-3">
+    <label for="date" class="form-label">Date:</label>
+    <input type="date" class="form-control" id="date" name="date" required>
+    <div class="invalid-feedback">
+      Please select a date.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="time" class="form-label">Time:</label>
+    <input type="time" class="form-control" id="time" name="time" required>
+    <div class="invalid-feedback">
+      Please select a time.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="staff_member" class="form-label">Staff member:</label>
+    <select class="form-select" id="staff_member" name="staff_member" required>
+      <option value="" disabled selected>Select a staff member</option>
+      {% for staff_member in staff_member %}
+        <option value="{{ staff_member.id }}">{{ staff_member.name }}</option>
+      {% endfor %}
+    </select>
+    <div class="invalid-feedback">
+      Please select a staff member.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="customer" class="form-label">Customer:</label>
+    <input type="text" class="form-control" id="customer" name="customer" required>
+    <div class="invalid-feedback">
+      Please enter customer name.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <button type="submit" class="btn btn-primary">Book appointment</button>
+  </div>
+</form>
 
 
-</html>
+
+</center>
+

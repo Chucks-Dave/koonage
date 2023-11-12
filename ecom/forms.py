@@ -1,7 +1,7 @@
 from pyclbr import Class
 from django import forms
 from django.contrib.auth.models import User
-from . import models
+from .models import *
 
 
 class CustomerUserForm(forms.ModelForm):
@@ -15,13 +15,13 @@ class CustomerUserForm(forms.ModelForm):
 
 class CustomerForm(forms.ModelForm):
     class Meta:
-        model = models.Customer
+        model = Customer
         fields = ['address', 'mobile', 'profile_pic']
 
 
 class ProductForm(forms.ModelForm):
     class Meta:
-        model = models.Product
+        model = Product
         fields = ['name', 'price', 'description', 'product_image']
 
 # address of shipment
@@ -35,7 +35,7 @@ class AddressForm(forms.Form):
 
 class FeedbackForm(forms.ModelForm):
     class Meta:
-        model = models.Feedback
+        model = Feedback
         fields = ['name', 'feedback']
 
 # for updating status of order
@@ -43,7 +43,7 @@ class FeedbackForm(forms.ModelForm):
 
 class OrderForm(forms.ModelForm):
     class Meta:
-        model = models.Orders
+        model = Orders
         fields = ['status']
 
 # for contact us page
@@ -56,11 +56,13 @@ class ContactusForm(forms.Form):
         max_length=500, widget=forms.Textarea(attrs={'rows': 3, 'cols': 30}))
 
 
-class AppointmentsForm(forms.Form):
-    Name = forms.CharField(max_length=30)
-    Email = forms.EmailField()
-    Message = forms.CharField(
-        max_length=500, widget=forms.Textarea(attrs={'rows': 3, 'cols': 30}))
+class AppointmentForm(forms.ModelForm):
+
+    class Meta:
+        model = Appointment
+
+        fields = ['date', 'time', 'staff_member',
+                  'customer', 'email', 'message']
 
 
 class CouponForm(forms.Form):

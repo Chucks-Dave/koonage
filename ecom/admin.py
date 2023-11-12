@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, Product, Orders, Feedback, Coupon
+from .models import Customer, Product, Orders, Feedback, Coupon, Appointment, Staff
 # Register your models here.
 
 
@@ -36,3 +36,17 @@ class CouponAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Coupon, CouponAdmin)
+
+
+class AppointmentAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(Appointment, AppointmentAdmin)
+
+
+class StaffAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(Staff, CouponAdmin)

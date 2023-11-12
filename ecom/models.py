@@ -72,3 +72,22 @@ class Coupon(models.Model):
 
     def __str__(self):
         return self.code
+
+
+class Staff(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+
+class Appointment(models.Model):
+    date = models.DateField()
+    time = models.TimeField()
+    staff_member = models.ForeignKey('Staff', on_delete=models.CASCADE)
+    customer = models.ForeignKey('Customer', on_delete=models.CASCADE)
+    email = models.EmailField(default='@example.com')  # Add 'email' field
+    message = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.date} at {self.time} with {self.staff_member.name} for {self.customer}"

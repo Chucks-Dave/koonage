@@ -1,25 +1,29 @@
+
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.template import Context
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 import io
 from django.shortcuts import render, redirect, reverse
-from . import forms, models
+
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.mail import send_mail
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.conf import settings
-from .models import Coupon, Orders
+from .models import Coupon, Orders, Appointment
 from django.views.decorators.http import require_POST
 from .forms import CouponForm
 from django.utils import timezone
 from django.contrib import messages
+from .forms import *
+from .models import *
 
 
 def home_view(request):
-    products = models.Product.objects.all()
+    products = Product.objects.all()
     if 'product_ids' in request.COOKIES:
         product_ids = request.COOKIES['product_ids']
         counter = product_ids.split('|')
@@ -79,17 +83,17 @@ def afterlogin_view(request):
 @login_required(login_url='adminlogin')
 def admin_dashboard_view(request):
     # for cards on dashboard
-    customercount = models.Customer.objects.all().count()
-    productcount = models.Product.objects.all().count()
-    ordercount = models.Orders.objects.all().count()
+    customercount = Customer.objects.all().count()
+    productcount = Product.objects.all().count()
+    ordercount = Orders.objects.all().count()
 
     # for recent order tables
-    orders = models.Orders.objects.all()
+    orders = Orders.objects.all()
     ordered_products = []
     ordered_bys = []
     for order in orders:
-        ordered_product = models.Product.objects.all().filter(id=order.product.id)
-        ordered_by = models.Customer.objects.all().filter(id=order.customer.id)
+        ordered_product = Product.objects.all().filter(id=order.product.id)
+        ordered_by = Customer.objects.all().filter(id=order.customer.id)
         ordered_products.append(ordered_product)
         ordered_bys.append(ordered_by)
 
@@ -244,7 +248,7 @@ def search_view(request):
 
 # any one can add product to cart, no need of signin
 def add_to_cart_view(request, pk):
-    products = models.Product.objects.all()
+    products = Product.objects.all()
 
     # for cart counter, fetching products ids added by customer from cookies
     if 'product_ids' in request.COOKIES:
@@ -268,7 +272,7 @@ def add_to_cart_view(request, pk):
     else:
         response.set_cookie('product_ids', pk)
 
-    product = models.Product.objects.get(id=pk)
+    product = Product.objects.get(id=pk)
     messages.info(request, product.name + ' added to cart successfully!')
 
     return response
@@ -291,7 +295,7 @@ def cart_view(request):
         product_ids = request.COOKIES['product_ids']
         if product_ids != "":
             product_id_in_cart = product_ids.split('|')
-            products = models.Product.objects.all().filter(id__in=product_id_in_cart)
+            products = Product.objects.all().filter(id__in=product_id_in_cart)
 
             # for total price shown in cart
             for p in products:
@@ -315,7 +319,7 @@ def remove_from_cart_view(request, pk):
         product_id_in_cart = product_ids.split('|')
         product_id_in_cart = list(set(product_id_in_cart))
         product_id_in_cart.remove(str(pk))
-        products = models.Product.objects.all().filter(id__in=product_id_in_cart)
+        products = Product.objects.all().filter(id__in=product_id_in_cart)
         # for total price shown in cart after removing product
         for p in products:
             total = total+p.price
@@ -351,7 +355,7 @@ def send_feedback_view(request):
 @login_required(login_url='customerlogin')
 @user_passes_test(is_customer)
 def customer_home_view(request):
-    products = models.Product.objects.all()
+    products = Product.objects.all()
     if 'product_ids' in request.COOKIES:
         product_ids = request.COOKIES['product_ids']
         counter = product_ids.split('|')
@@ -536,9 +540,9 @@ def aboutus_view(request):
 
 
 def contactus_view(request):
-    sub = forms.ContactusForm()
+    sub = ContactusForm()
     if request.method == 'POST':
-        sub = forms.ContactusForm(request.POST)
+        sub = ContactusForm(request.POST)
         if sub.is_valid():
             email = sub.cleaned_data['Email']
             name = sub.cleaned_data['Name']
@@ -547,20 +551,6 @@ def contactus_view(request):
                       settings.EMAIL_RECEIVING_USER, fail_silently=False)
             return render(request, 'ecom/contactussuccess.html')
     return render(request, 'ecom/contactus.html', {'form': sub})
-
-
-def appointments_view(request):
-    sub = forms.ContactusForm()
-    if request.method == 'POST':
-        sub = forms.AppointmentsForm(request.POST)
-        if sub.is_valid():
-            email = sub.cleaned_data['Email']
-            name = sub.cleaned_data['Name']
-            message = sub.cleaned_data['Message']
-            send_mail(str(name)+' || '+str(email), message, settings.EMAIL_HOST_USER,
-                      settings.EMAIL_RECEIVING_USER, fail_silently=False)
-            return render(request, 'ecom/contactussuccess.html')
-    return render(request, 'ecom/appointments.html', {'form': sub})
 
 
 def apply_coupon(request):
@@ -599,3 +589,62 @@ def apply_coupon(request):
                 form.add_error('code', 'Invalid or expired coupon code')
 
     return render(request, 'ecom/payment_success.html', {'form': form, 'total': total})
+
+
+def appointment_list(request):
+    appointments = Appointment.objects.all()
+    context = {
+        'appointments': appointments,
+    }
+    return render(request, 'ecom/appointment_list.html', context)
+
+
+def appointment_detail(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    context = {
+        'appointment': appointment,
+    }
+    return render(request, 'ecom/appointment_detail.html', context)
+
+
+def create_appointment(request):
+    staff_member = Staff.objects.all()
+    form = AppointmentForm()
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            customer = form.cleaned_data['customer']
+            message = form.cleaned_data['message']
+            send_mail(str(customer)+' || '+str(email), message, settings.EMAIL_HOST_USER,
+                      settings.EMAIL_RECEIVING_USER, fail_silently=False)
+
+            return render(request, 'ecom/appointment_success.html')
+    return render(request, 'ecom/appointment.html', {'form': form, 'staff_member': staff_member})
+
+
+def appointment_update(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            return redirect('ecom:appointment_detail', pk=appointment.pk)
+    else:
+        form = AppointmentForm(instance=appointment)
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'ecom/appointment_update.html', context)
+
+
+def appointment_delete(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    appointment.delete()
+    return redirect('ecom:appointment_list')
+
+
+def appointment_success(request):
+    return render(request, 'ecom/appointment_success.html')

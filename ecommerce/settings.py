@@ -158,3 +158,5 @@ EMAIL_HOST_PASSWORD = 'xyz'  # host email password required
 # this process is required because google blocks apps authentication by default
 # email on which you will receive messages sent from website
 EMAIL_RECEIVING_USER = ['to@gmail.com']
+
+CALENDARIUM_SHIFT_WEEKSTART = -1

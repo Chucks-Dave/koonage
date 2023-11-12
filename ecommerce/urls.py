@@ -21,4 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('ecom.urls')),
     path('tr', include('django_cash_register.urls')),
+
+
+
 ]

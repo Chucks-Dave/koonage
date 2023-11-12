@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+{% load static %}
+
+{%if request.user.is_authenticated%}
+    {% include "ecom/customer_navbar.html" %}
+  {%else%}
+   
+  {%endif%}
+
+{% block content %}
+  <div class="container">
+    <h1 class="mt-5">Appointment Detail</h1>
+    
+    <div class="card mt-3">
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-3">Date:</dt>
+          <dd class="col-sm-9">{{ appointment.date }}</dd>
+          
+          <dt class="col-sm-3">Time:</dt>
+          <dd class="col-sm-9">{{ appointment.time }}</dd>
+          
+          <dt class="col-sm-3">Staff Member:</dt>
+          <dd class="col-sm-9">{{ appointment.staff_member }}</dd>
+          
+          <dt class="col-sm-3">Customer:</dt>
+          <dd class="col-sm-9">{{ appointment.customer }}</dd>
+        </dl>
+        
+        <a href="{% url 'ecom:appointment_list' %}" class="btn btn-primary">Back to List</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
