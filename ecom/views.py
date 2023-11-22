@@ -43,12 +43,12 @@ def adminclick_view(request):
 
 
 def customer_signup_view(request):
-    userForm = forms.CustomerUserForm()
-    customerForm = forms.CustomerForm()
+    userForm = CustomerUserForm()
+    customerForm = CustomerForm()
     mydict = {'userForm': userForm, 'customerForm': customerForm}
     if request.method == 'POST':
-        userForm = forms.CustomerUserForm(request.POST)
-        customerForm = forms.CustomerForm(request.POST, request.FILES)
+        userForm = CustomerUserForm(request.POST)
+        customerForm = CustomerForm(request.POST, request.FILES)
         if userForm.is_valid() and customerForm.is_valid():
             user = userForm.save()
             user.set_password(user.password)
@@ -109,7 +109,7 @@ def admin_dashboard_view(request):
 # admin view customer table
 @login_required(login_url='adminlogin')
 def view_customer_view(request):
-    customers = models.Customer.objects.all()
+    customers = Customer.objects.all()
     return render(request, 'ecom/view_customer.html', {'customers': customers})
 
 # admin delete customer
@@ -117,8 +117,8 @@ def view_customer_view(request):
 
 @login_required(login_url='adminlogin')
 def delete_customer_view(request, pk):
-    customer = models.Customer.objects.get(id=pk)
-    user = models.User.objects.get(id=customer.user_id)
+    customer = Customer.objects.get(id=pk)
+    user = User.objects.get(id=customer.user_id)
     user.delete()
     customer.delete()
     return redirect('view-customer')
@@ -126,14 +126,14 @@ def delete_customer_view(request, pk):
 
 @login_required(login_url='adminlogin')
 def update_customer_view(request, pk):
-    customer = models.Customer.objects.get(id=pk)
-    user = models.User.objects.get(id=customer.user_id)
-    userForm = forms.CustomerUserForm(instance=user)
-    customerForm = forms.CustomerForm(request.FILES, instance=customer)
+    customer = Customer.objects.get(id=pk)
+    user = User.objects.get(id=customer.user_id)
+    userForm = CustomerUserForm(instance=user)
+    customerForm = CustomerForm(request.FILES, instance=customer)
     mydict = {'userForm': userForm, 'customerForm': customerForm}
     if request.method == 'POST':
-        userForm = forms.CustomerUserForm(request.POST, instance=user)
-        customerForm = forms.CustomerForm(request.POST, instance=customer)
+        userForm = CustomerUserForm(request.POST, instance=user)
+        customerForm = CustomerForm(request.POST, instance=customer)
         if userForm.is_valid() and customerForm.is_valid():
             user = userForm.save()
             user.set_password(user.password)
@@ -147,16 +147,16 @@ def update_customer_view(request, pk):
 
 @login_required(login_url='adminlogin')
 def admin_products_view(request):
-    products = models.Product.objects.all()
+    products = Product.objects.all()
     return render(request, 'ecom/admin_products.html', {'products': products})
 
 
 # admin add product by clicking on floating button
 @login_required(login_url='adminlogin')
 def admin_add_product_view(request):
-    productForm = forms.ProductForm()
+    productForm = ProductForm()
     if request.method == 'POST':
-        productForm = forms.ProductForm(request.POST, request.FILES)
+        productForm = ProductForm(request.POST, request.FILES)
         if productForm.is_valid():
             productForm.save()
         return HttpResponseRedirect('admin-products')
@@ -165,17 +165,17 @@ def admin_add_product_view(request):
 
 @login_required(login_url='adminlogin')
 def delete_product_view(request, pk):
-    product = models.Product.objects.get(id=pk)
+    product = Product.objects.get(id=pk)
     product.delete()
     return redirect('admin-products')
 
 
 @login_required(login_url='adminlogin')
 def update_product_view(request, pk):
-    product = models.Product.objects.get(id=pk)
-    productForm = forms.ProductForm(instance=product)
+    product = Product.objects.get(id=pk)
+    productForm = ProductForm(instance=product)
     if request.method == 'POST':
-        productForm = forms.ProductForm(
+        productForm = ProductForm(
             request.POST, request.FILES, instance=product)
         if productForm.is_valid():
             productForm.save()
@@ -185,12 +185,12 @@ def update_product_view(request, pk):
 
 @login_required(login_url='adminlogin')
 def admin_view_booking_view(request):
-    orders = models.Orders.objects.all()
+    orders = Orders.objects.all()
     ordered_products = []
     ordered_bys = []
     for order in orders:
-        ordered_product = models.Product.objects.all().filter(id=order.product.id)
-        ordered_by = models.Customer.objects.all().filter(id=order.customer.id)
+        ordered_product = Product.objects.all().filter(id=order.product.id)
+        ordered_by = Customer.objects.all().filter(id=order.customer.id)
         ordered_products.append(ordered_product)
         ordered_bys.append(ordered_by)
     return render(request, 'ecom/admin_view_booking.html', {'data': zip(ordered_products, ordered_bys, orders)})
@@ -198,7 +198,7 @@ def admin_view_booking_view(request):
 
 @login_required(login_url='adminlogin')
 def delete_order_view(request, pk):
-    order = models.Orders.objects.get(id=pk)
+    order = Orders.objects.get(id=pk)
     order.delete()
     return redirect('admin-view-booking')
 
@@ -207,10 +207,10 @@ def delete_order_view(request, pk):
 
 @login_required(login_url='adminlogin')
 def update_order_view(request, pk):
-    order = models.Orders.objects.get(id=pk)
-    orderForm = forms.OrderForm(instance=order)
+    order = Orders.objects.get(id=pk)
+    orderForm = OrderForm(instance=order)
     if request.method == 'POST':
-        orderForm = forms.OrderForm(request.POST, instance=order)
+        orderForm = OrderForm(request.POST, instance=order)
         if orderForm.is_valid():
             orderForm.save()
             return redirect('admin-view-booking')
@@ -220,7 +220,7 @@ def update_order_view(request, pk):
 # admin view the feedback
 @login_required(login_url='adminlogin')
 def view_feedback_view(request):
-    feedbacks = models.Feedback.objects.all().order_by('-id')
+    feedbacks = Feedback.objects.all().order_by('-id')
     return render(request, 'ecom/view_feedback.html', {'feedbacks': feedbacks})
 
 
@@ -230,7 +230,7 @@ def view_feedback_view(request):
 def search_view(request):
     # whatever user write in search box we get in query
     query = request.GET['query']
-    products = models.Product.objects.all().filter(name__icontains=query)
+    products = Product.objects.all().filter(name__icontains=query)
     if 'product_ids' in request.COOKIES:
         product_ids = request.COOKIES['product_ids']
         counter = product_ids.split('|')
@@ -340,9 +340,9 @@ def remove_from_cart_view(request, pk):
 
 
 def send_feedback_view(request):
-    feedbackForm = forms.FeedbackForm()
+    feedbackForm = FeedbackForm()
     if request.method == 'POST':
-        feedbackForm = forms.FeedbackForm(request.POST)
+        feedbackForm = FeedbackForm(request.POST)
         if feedbackForm.is_valid():
             feedbackForm.save()
             return render(request, 'ecom/feedback_sent.html')
@@ -383,9 +383,9 @@ def customer_address_view(request):
     else:
         product_count_in_cart = 0
 
-    addressForm = forms.AddressForm()
+    addressForm = AddressForm()
     if request.method == 'POST':
-        addressForm = forms.AddressForm(request.POST)
+        addressForm = AddressForm(request.POST)
         if addressForm.is_valid():
             # here we are taking address, email, mobile at time of order placement
             # we are not taking it from customer account table because
@@ -399,7 +399,7 @@ def customer_address_view(request):
                 product_ids = request.COOKIES['product_ids']
                 if product_ids != "":
                     product_id_in_cart = product_ids.split('|')
-                    products = models.Product.objects.all().filter(id__in=product_id_in_cart)
+                    products = Product.objects.all().filter(id__in=product_id_in_cart)
                     for p in products:
                         total = total+p.price
 
@@ -420,7 +420,7 @@ def payment_success_view(request):
     # we will fetch product id from cookies then respective details from db
     # then we will create order objects and store in db
     # after that we will delete cookies because after order placed...cart should be empty
-    customer = models.Customer.objects.get(user_id=request.user.id)
+    customer = Customer.objects.get(user_id=request.user.id)
     products = None
     email = None
     mobile = None
@@ -429,7 +429,7 @@ def payment_success_view(request):
         product_ids = request.COOKIES['product_ids']
         if product_ids != "":
             product_id_in_cart = product_ids.split('|')
-            products = models.Product.objects.all().filter(id__in=product_id_in_cart)
+            products = Product.objects.all().filter(id__in=product_id_in_cart)
             # Here we get products list that will be ordered by one customer at a time
 
     # these things can be change so accessing at the time of order...
@@ -444,7 +444,7 @@ def payment_success_view(request):
     # suppose if we have 5 items in cart and we place order....so 5 rows will be created in orders table
     # there will be lot of redundant data in orders table...but its become more complicated if we normalize it
     for product in products:
-        models.Orders.objects.get_or_create(
+        Orders.objects.get_or_create(
             customer=customer, product=product, status='Pending', email=email, mobile=mobile, address=address)
 
     # after order placed cookies should be deleted
@@ -459,11 +459,11 @@ def payment_success_view(request):
 @login_required(login_url='customerlogin')
 @user_passes_test(is_customer)
 def my_order_view(request):
-    customer = models.Customer.objects.get(user_id=request.user.id)
-    orders = models.Orders.objects.all().filter(customer_id=customer)
+    customer = Customer.objects.get(user_id=request.user.id)
+    orders = Orders.objects.all().filter(customer_id=customer)
     ordered_products = []
     for order in orders:
-        ordered_product = models.Product.objects.all().filter(id=order.product.id)
+        ordered_product = Product.objects.all().filter(id=order.product.id)
         ordered_products.append(ordered_product)
 
     return render(request, 'ecom/my_order.html', {'data': zip(ordered_products, orders)})
@@ -485,8 +485,8 @@ def render_to_pdf(template_src, context_dict):
 @login_required(login_url='customerlogin')
 @user_passes_test(is_customer)
 def download_invoice_view(request, orderID, productID):
-    order = models.Orders.objects.get(id=orderID)
-    product = models.Product.objects.get(id=productID)
+    order = Orders.objects.get(id=orderID)
+    product = Product.objects.get(id=productID)
     mydict = {
         'orderDate': order.order_date,
         'customerName': request.user,
@@ -508,21 +508,21 @@ def download_invoice_view(request, orderID, productID):
 @login_required(login_url='customerlogin')
 @user_passes_test(is_customer)
 def my_profile_view(request):
-    customer = models.Customer.objects.get(user_id=request.user.id)
+    customer = Customer.objects.get(user_id=request.user.id)
     return render(request, 'ecom/my_profile.html', {'customer': customer})
 
 
 @login_required(login_url='customerlogin')
 @user_passes_test(is_customer)
 def edit_profile_view(request):
-    customer = models.Customer.objects.get(user_id=request.user.id)
-    user = models.User.objects.get(id=customer.user_id)
-    userForm = forms.CustomerUserForm(instance=user)
-    customerForm = forms.CustomerForm(request.FILES, instance=customer)
+    customer = Customer.objects.get(user_id=request.user.id)
+    user = User.objects.get(id=customer.user_id)
+    userForm = CustomerUserForm(instance=user)
+    customerForm = CustomerForm(request.FILES, instance=customer)
     mydict = {'userForm': userForm, 'customerForm': customerForm}
     if request.method == 'POST':
-        userForm = forms.CustomerUserForm(request.POST, instance=user)
-        customerForm = forms.CustomerForm(request.POST, instance=customer)
+        userForm = CustomerUserForm(request.POST, instance=user)
+        customerForm = CustomerForm(request.POST, instance=customer)
         if userForm.is_valid() and customerForm.is_valid():
             user = userForm.save()
             user.set_password(user.password)
